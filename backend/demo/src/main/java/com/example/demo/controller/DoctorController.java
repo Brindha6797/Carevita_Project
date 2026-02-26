@@ -26,27 +26,27 @@ public class DoctorController {
     }
 
     @GetMapping("/search")
-    public List<Doctor> search(@RequestParam String query) {
+    public List<Doctor> search(@RequestParam("query") String query) {
         return service.searchDoctors(query);
     }
 
     @GetMapping("/location")
-    public List<Doctor> getByLocation(@RequestParam String location) {
+    public List<Doctor> getByLocation(@RequestParam("location") String location) {
         return service.getDoctorsByLocation(location);
     }
 
     @GetMapping("/{id}")
-    public Doctor getById(@PathVariable Long id) {
+    public Doctor getById(@PathVariable("id") Long id) {
         return service.getDoctorById(id);
     }
 
     @PutMapping("/{id}")
-    public Doctor updateDoctor(@PathVariable Long id, @RequestBody Doctor doctor) {
+    public Doctor updateDoctor(@PathVariable("id") Long id, @RequestBody Doctor doctor) {
         return service.updateDoctor(id, doctor);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteDoctor(@PathVariable Long id) {
+    public String deleteDoctor(@PathVariable("id") Long id) {
         service.deleteDoctor(id);
         return "Doctor deleted successfully";
     }

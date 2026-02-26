@@ -47,7 +47,7 @@ public class HealthInsightsService {
                     + " hours of sleep. Try to hit 8 hours to reduce fatigue.");
         }
 
-        // 3. Mood + Health Sync (Stress Risk)
+        // 3. Mood + Health Sync (Stress & Mood Pattern)
         long stressedMoodCount = logs.stream().limit(7)
                 .filter(l -> l.getMood() != null
                         && (l.getMood().equalsIgnoreCase("stressed") || l.getMood().equalsIgnoreCase("anxious")))
@@ -60,12 +60,33 @@ public class HealthInsightsService {
             }
         }
 
-        // 4. Family Reminder Buddy Logic (Simulated for insights)
+        // 4. Flu-like Symptom Correlation
+        long feverCount = logs.stream().limit(5)
+                .filter(l -> l.getSymptoms() != null && l.getSymptoms().toLowerCase().contains("fever"))
+                .count();
+        long bodyPainCount = logs.stream().limit(5)
+                .filter(l -> l.getSymptoms() != null && l.getSymptoms().toLowerCase().contains("body pain"))
+                .count();
+
+        if (feverCount >= 2 && bodyPainCount >= 2) {
+            insights.add("ALERT: Flu-like Pattern detected. Please monitor your temperature and stay hydrated.");
+        }
+
+        // 5. Fatigue & Activity Correlation
+        long coughCount = logs.stream().limit(7)
+                .filter(l -> l.getSymptoms() != null && l.getSymptoms().toLowerCase().contains("cough"))
+                .count();
+        if (coughCount >= 3) {
+            insights.add(
+                    "Insight: Persistent cough detected. If this continues for more than a week, consider consulting a specialist.");
+        }
+
+        // 6. Family Reminder Buddy Logic
         if (logs.size() > 1 && logs.get(0).getLogDate().isBefore(java.time.LocalDate.now())) {
             insights.add("Reminder: You haven't logged today's health! Consistent tracking helps Predictor accuracy.");
         }
 
-        // 5. Doctor-Free First Insight (Guidelines/Lifestyle Suggestions)
+        // 7. Doctor-Free First Insight (Guidelines/Lifestyle Suggestions)
         if (headacheCount >= 1) {
             insights.add(
                     "Lifestyle Tip: For headaches, ensure you're in a well-ventilated room and try a cold compress.");
@@ -73,6 +94,9 @@ public class HealthInsightsService {
         if (tirednessCount >= 1) {
             insights.add(
                     "Lifestyle Tip: To combat tiredness, try short 20-minute power naps and reduce screen time before bed.");
+        }
+        if (feverCount >= 1) {
+            insights.add("Care Tip: For fever, drink plenty of fluids and use lightweight clothing.");
         }
         if (avgWater < 2000) {
             insights.add(

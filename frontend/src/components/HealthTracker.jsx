@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import API from "../services/api";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const HealthTracker = () => {
     const [water, setWater] = useState(0);
@@ -65,7 +65,9 @@ const HealthTracker = () => {
                                 style={{ height: '100%', background: '#3b82f6' }}
                             />
                         </div>
+                        <button onClick={() => setWater(Math.max(0, water - 250))} className="btn-secondary" style={{ padding: '8px 16px', fontSize: '0.8rem', background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca' }}>-250ml</button>
                         <button onClick={() => setWater(water + 250)} className="btn-secondary" style={{ padding: '8px 16px', fontSize: '0.8rem' }}>+250ml</button>
+
                     </div>
                 </div>
 

@@ -3,6 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import prescriptionService from "../services/prescriptionService";
 import { Link } from "react-router-dom";
 
+const statusColors = {
+    ACTIVE: { bg: "#dcfce7", color: "#166534", border: "#bbf7d0" },
+    COMPLETED: { bg: "#dbeafe", color: "#1e40af", border: "#bfdbfe" },
+    EXPIRED: { bg: "#fee2e2", color: "#991b1b", border: "#fecaca" },
+    CANCELLED: { bg: "#f1f5f9", color: "#475569", border: "#e2e8f0" },
+};
+
 const PrescriptionList = () => {
     const [prescriptions, setPrescriptions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -19,121 +26,170 @@ const PrescriptionList = () => {
     const fetchPrescriptions = async (currentUser) => {
         try {
             let response;
-            if (currentUser.roles.includes("ROLE_DOCTOR")) {
+            if (currentUser?.roles?.includes("ROLE_DOCTOR")) {
                 response = await prescriptionService.getDoctorPrescriptions(currentUser.id);
             } else {
                 response = await prescriptionService.getPatientPrescriptions(currentUser.id);
             }
             setPrescriptions(response.data);
-            setLoading(false);
         } catch (error) {
             console.error("Error fetching prescriptions:", error);
+        } finally {
             setLoading(false);
         }
     };
 
     const filteredPrescriptions = prescriptions.filter(p => {
         const matchesFilter = filter === "ALL" || p.status === filter;
-        const matchesSearch = p.medicine.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (p.doctorName && p.doctorName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (p.patientName && p.patientName.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesSearch =
+            (p.medicine || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (p.doctorName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (p.patientName || "").toLowerCase().includes(searchTerm.toLowerCase());
         return matchesFilter && matchesSearch;
     });
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case "ACTIVE": return "text-green-600 bg-green-100";
-            case "COMPLETED": return "text-blue-600 bg-blue-100";
-            case "EXPIRED": return "text-red-600 bg-red-100";
-            case "CANCELLED": return "text-gray-600 bg-gray-100";
-            default: return "text-gray-600 bg-gray-100";
-        }
-    };
-
     if (loading) return (
-        <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+            <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1 }}
+                style={{ width: "44px", height: "44px", border: "4px solid var(--primary)", borderTopColor: "transparent", borderRadius: "50%" }}
+            />
         </div>
     );
 
-    return (
-        <div className="max-w-6xl mx-auto p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <h1 className="text-3xl font-bold text-gray-800">Prescriptions</h1>
+    const selectStyle = {
+        padding: "10px 16px", borderRadius: "12px", border: "1.5px solid #e2e8f0",
+        fontSize: "0.95rem", outline: "none", background: "white", cursor: "pointer", fontFamily: "inherit"
+    };
 
-                <div className="flex flex-wrap gap-2 items-center">
+    return (
+        <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 5%" }}>
+            {/* Header */}
+            <motion.div
+                initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+                style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", marginBottom: "36px", gap: "16px" }}
+            >
+                <h1 style={{ fontSize: "2.2rem", fontWeight: "800", color: "var(--primary)", margin: 0 }}>
+                    💊 Prescriptions
+                </h1>
+
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
                     <input
                         type="text"
                         placeholder="Search medicines or names..."
-                        className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ ...selectStyle, minWidth: "220px" }}
                     />
-
-                    <select
-                        className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                    >
+                    <select value={filter} onChange={(e) => setFilter(e.target.value)} style={selectStyle}>
                         <option value="ALL">All Status</option>
                         <option value="ACTIVE">Active</option>
                         <option value="COMPLETED">Completed</option>
                         <option value="EXPIRED">Expired</option>
                         <option value="CANCELLED">Cancelled</option>
                     </select>
-
-                    {user && user.roles.includes("ROLE_DOCTOR") && (
-                        <Link to="/prescriptions/new" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            New Prescription
+                    {user?.roles?.includes("ROLE_DOCTOR") && (
+                        <Link to="/prescriptions/new" style={{ textDecoration: "none" }}>
+                            <motion.div
+                                whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                                style={{
+                                    padding: "10px 22px", background: "var(--primary)", color: "white",
+                                    borderRadius: "14px", fontWeight: "700", fontSize: "0.95rem", cursor: "pointer"
+                                }}
+                            >
+                                + New Prescription
+                            </motion.div>
                         </Link>
                     )}
                 </div>
-            </div>
+            </motion.div>
 
+            {/* Empty state */}
             {filteredPrescriptions.length === 0 ? (
-                <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                    <p className="text-xl text-gray-500">No prescriptions found.</p>
-                </div>
+                <motion.div
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    style={{
+                        textAlign: "center", padding: "60px 20px", background: "#f8fafc",
+                        borderRadius: "24px", border: "2px dashed #e2e8f0"
+                    }}
+                >
+                    <div style={{ fontSize: "3rem", marginBottom: "16px" }}>📋</div>
+                    <p style={{ fontSize: "1.1rem", color: "#94a3b8", margin: 0 }}>No prescriptions found.</p>
+                </motion.div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "24px" }}>
                     <AnimatePresence>
-                        {filteredPrescriptions.map((p, index) => (
-                            <motion.div
-                                key={p.id}
-                                layout
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ duration: 0.2, delay: index * 0.05 }}
-                                className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow cursor-pointer"
-                            >
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(p.status)}`}>
-                                        {p.status}
+                        {filteredPrescriptions.map((p, index) => {
+                            const sc = statusColors[p.status] || statusColors.CANCELLED;
+                            return (
+                                <motion.div
+                                    key={p.id}
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 0.2, delay: index * 0.04 }}
+                                    whileHover={{ y: -4, boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }}
+                                    style={{
+                                        background: "white", padding: "24px", borderRadius: "24px",
+                                        boxShadow: "0 4px 16px rgba(0,0,0,0.06)", border: "1px solid #f1f5f9",
+                                        transition: "box-shadow 0.2s", cursor: "pointer"
+                                    }}
+                                >
+                                    {/* Status + Date */}
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                                        <span style={{
+                                            padding: "4px 12px", borderRadius: "999px", fontSize: "0.78rem",
+                                            fontWeight: "700", background: sc.bg, color: sc.color, border: `1px solid ${sc.border}`
+                                        }}>
+                                            {p.status}
+                                        </span>
+                                        <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
+                                            {p.prescriptionDate ? new Date(p.prescriptionDate).toLocaleDateString() : "—"}
+                                        </span>
                                     </div>
-                                    <p className="text-sm text-gray-400">
-                                        {new Date(p.prescriptionDate).toLocaleDateString()}
+
+                                    {/* Medicine name */}
+                                    <h3 style={{ fontSize: "1.3rem", fontWeight: "800", color: "#1e293b", margin: "0 0 4px 0" }}>
+                                        {p.medicine}
+                                    </h3>
+                                    <p style={{ color: "var(--primary)", fontWeight: "600", margin: "0 0 16px 0", fontSize: "0.95rem" }}>
+                                        {p.dosage}
                                     </p>
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-800 mb-1">{p.medicine}</h3>
-                                <p className="text-blue-600 font-medium mb-4">{p.dosage}</p>
 
-                                <div className="space-y-2 mb-6">
-                                    <div className="flex items-center text-sm text-gray-600">
-                                        <span className="w-20 font-medium tracking-tight">Doctor:</span>
-                                        <span>{p.doctorName || "Dr. CareVita"}</span>
+                                    {/* Details */}
+                                    <div style={{ display: "grid", gap: "6px", marginBottom: "20px" }}>
+                                        <div style={{ display: "flex", fontSize: "0.88rem", color: "#475569" }}>
+                                            <span style={{ width: "90px", fontWeight: "600" }}>Doctor:</span>
+                                            <span>{p.doctorName || "Dr. CareVita"}</span>
+                                        </div>
+                                        <div style={{ display: "flex", fontSize: "0.88rem", color: "#475569" }}>
+                                            <span style={{ width: "90px", fontWeight: "600" }}>Frequency:</span>
+                                            <span>{p.frequency || "As prescribed"}</span>
+                                        </div>
+                                        {p.patientName && (
+                                            <div style={{ display: "flex", fontSize: "0.88rem", color: "#475569" }}>
+                                                <span style={{ width: "90px", fontWeight: "600" }}>Patient:</span>
+                                                <span>{p.patientName}</span>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="flex items-center text-sm text-gray-600">
-                                        <span className="w-20 font-medium tracking-tight">Frequency:</span>
-                                        <span>{p.frequency || "As prescribed"}</span>
-                                    </div>
-                                </div>
 
-                                <Link to={`/prescriptions/${p.id}`} className="block w-full text-center py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg transition-colors">
-                                    View Details
-                                </Link>
-                            </motion.div>
-                        ))}
+                                    <Link
+                                        to={`/prescriptions/${p.id}`}
+                                        style={{
+                                            display: "block", textAlign: "center", padding: "10px",
+                                            color: "var(--primary)", fontWeight: "700", fontSize: "0.9rem",
+                                            textDecoration: "none", borderTop: "1px solid #f1f5f9", paddingTop: "14px",
+                                            transition: "color 0.2s"
+                                        }}
+                                    >
+                                        View Details →
+                                    </Link>
+                                </motion.div>
+                            );
+                        })}
                     </AnimatePresence>
                 </div>
             )}

@@ -8,18 +8,14 @@ const DoctorSearch = () => {
     const [doctors, setDoctors] = useState([]);
     const [query, setQuery] = useState("");
     const [selectedDoctor, setSelectedDoctor] = useState(null);
-    const [loading, setLoading] = useState(false);
 
     const fetchDoctors = async (searchQuery = "") => {
-        setLoading(true);
         try {
             const endpoint = searchQuery ? `/doctors/search?query=${searchQuery}` : "/doctors/all";
             const res = await API.get(endpoint);
             setDoctors(res.data);
         } catch (err) {
             console.error(err);
-        } finally {
-            setLoading(false);
         }
     };
 

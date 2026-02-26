@@ -24,8 +24,10 @@ public class Appointment {
 
     private String appointmentDate;
     private String appointmentTime;
-    private String status; // BOOKED, COMPLETED, CANCELLED
-    private String reason;
+    private String status; // BOOKED, PENDING, CONFIRMED, COMPLETED, CANCELLED
+    private String problem;
+    private Long hospitalId;
+    private String dayOfWeek;
 
     public Appointment() {
     }
@@ -78,11 +80,27 @@ public class Appointment {
         this.status = status;
     }
 
-    public String getReason() {
-        return reason;
+    public String getProblem() {
+        return problem;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public void setProblem(String problem) {
+        this.problem = problem;
+    }
+
+    public Long getHospitalId() {
+        return hospitalId;
+    }
+
+    public void setHospitalId(Long hospitalId) {
+        this.hospitalId = hospitalId;
+    }
+
+    public String getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public void setDayOfWeek(String dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
     }
 }

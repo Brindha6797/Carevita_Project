@@ -27,7 +27,9 @@ import com.example.demo.payload.response.JwtResponse;
 import com.example.demo.payload.response.MessageResponse;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.DoctorRepository;
+import com.example.demo.repository.HospitalRepository;
 import com.example.demo.security.jwt.JwtUtils;
+
 import com.example.demo.security.services.UserDetailsImpl;
 
 @RestController
@@ -41,6 +43,9 @@ public class AuthController {
 
     @Autowired
     DoctorRepository doctorRepository;
+
+    @Autowired
+    HospitalRepository hospitalRepository;
 
     @Autowired
     PasswordEncoder encoder;
@@ -66,6 +71,7 @@ public class AuthController {
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
+                userDetails.getHospitalId(),
                 roles));
     }
 
@@ -104,7 +110,15 @@ public class AuthController {
         user.setPhoneNumber(signUpRequest.getPhoneNumber());
         user.setAddress(signUpRequest.getAddress());
         user.setHospital(signUpRequest.getHospital());
+
+        // Link to Hospital if exists
+        if (signUpRequest.getHospital() != null) {
+            hospitalRepository.findByName(signUpRequest.getHospital())
+                    .ifPresent(h -> user.setHospitalId(h.getId()));
+        }
+
         user.setQualification(signUpRequest.getQualification());
+
         user.setExperience(signUpRequest.getExperience());
 
         Set<String> strRoles = signUpRequest.getRole();
@@ -120,6 +134,12 @@ public class AuthController {
                         break;
                     case "doctor":
                         roles.add(Role.ROLE_DOCTOR);
+                        break;
+                    case "receptionist":
+                        roles.add(Role.ROLE_RECEPTIONIST);
+                        break;
+                    case "hospital_admin":
+                        roles.add(Role.ROLE_HOSPITAL_ADMIN);
                         break;
                     default:
                         roles.add(Role.ROLE_USER);
@@ -138,6 +158,10 @@ public class AuthController {
             doctorProfile.setSpecialization(signUpRequest.getQualification());
             doctorProfile.setHospitalName(signUpRequest.getHospital());
 
+            // Link to Hospital if exists
+            hospitalRepository.findByName(signUpRequest.getHospital())
+                    .ifPresent(h -> doctorProfile.setHospitalId(h.getId()));
+
             // Safe parsing of experience
             try {
                 if (signUpRequest.getExperience() != null) {
@@ -147,6 +171,7 @@ public class AuthController {
                 doctorProfile.setExperience(0);
             }
 
+            doctorProfile.setApproved(false);
             doctorRepository.save(doctorProfile);
         }
 

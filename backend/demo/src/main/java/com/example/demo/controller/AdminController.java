@@ -30,7 +30,7 @@ public class AdminController {
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+    public ResponseEntity<?> updateUser(@PathVariable("id") Long id, @RequestBody User userDetails) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error: User not found."));
 
@@ -44,7 +44,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable("id") Long id) {
         userRepository.deleteById(id);
         return ResponseEntity.ok("User deleted successfully!");
     }
@@ -57,7 +57,7 @@ public class AdminController {
     }
 
     @PutMapping("/doctors/{id}")
-    public ResponseEntity<?> updateDoctor(@PathVariable Long id, @RequestBody Doctor doctorDetails) {
+    public ResponseEntity<?> updateDoctor(@PathVariable("id") Long id, @RequestBody Doctor doctorDetails) {
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error: Doctor not found."));
 
@@ -72,7 +72,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/doctors/{id}")
-    public ResponseEntity<?> deleteDoctor(@PathVariable Long id) {
+    public ResponseEntity<?> deleteDoctor(@PathVariable("id") Long id) {
         doctorRepository.deleteById(id);
         return ResponseEntity.ok("Doctor deleted successfully!");
     }

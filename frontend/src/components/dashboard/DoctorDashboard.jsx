@@ -7,6 +7,9 @@ const DoctorDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [selectedApt, setSelectedApt] = useState(null);
     const [prescription, setPrescription] = useState("");
+    const [patientSummary, setPatientSummary] = useState(null);
+    const [showSummary, setShowSummary] = useState(false);
+
 
     useEffect(() => {
         fetchDoctorAppointments();
@@ -14,7 +17,6 @@ const DoctorDashboard = () => {
 
     const fetchDoctorAppointments = async () => {
         try {
-            // Updated endpoint for doctor specific appointments
             const res = await API.get("/appointments/doctor");
             setAppointments(res.data);
             setLoading(false);
@@ -23,6 +25,17 @@ const DoctorDashboard = () => {
             setLoading(false);
         }
     };
+
+    const fetchPatientInsight = async (patientId) => {
+        try {
+            const res = await API.get(`/health/patient/${patientId}`);
+            setPatientSummary(res.data);
+            setShowSummary(true);
+        } catch (err) {
+            alert("Failed to fetch patient health insights");
+        }
+    };
+
 
     const handleUpdateStatus = async (id, status) => {
         try {
@@ -76,8 +89,10 @@ const DoctorDashboard = () => {
                                 <div>
                                     <h4 style={{ margin: "0 0 5px 0" }}>{apt.patient.fullName || apt.patient.username}</h4>
                                     <p style={{ margin: 0, fontSize: "0.85rem", color: "#64748b" }}>{apt.appointmentDate} | {apt.appointmentTime}</p>
+                                    <p style={{ margin: "5px 0", fontSize: "0.8rem", color: "#475569", fontWeight: "500" }}>Reason: {apt.problem}</p>
                                     <span style={{ fontSize: "0.75rem", background: "#e0f2fe", color: "#0369a1", padding: "4px 8px", borderRadius: "99px" }}>{apt.status}</span>
                                 </div>
+
                                 <div style={{ display: "flex", gap: "10px" }}>
                                     <button
                                         onClick={() => setSelectedApt(apt)}
@@ -86,12 +101,19 @@ const DoctorDashboard = () => {
                                         Consult
                                     </button>
                                     <button
+                                        onClick={() => fetchPatientInsight(apt.patient.id)}
+                                        style={{ background: "#f0f9ff", color: "#0369a1", border: "1px solid #bae6fd", padding: "8px 16px", borderRadius: "10px", cursor: "pointer" }}
+                                    >
+                                        Insights
+                                    </button>
+                                    <button
                                         onClick={() => handleUpdateStatus(apt.id, "CANCELLED")}
                                         style={{ background: "#fee2e2", color: "#ef4444", border: "none", padding: "8px 16px", borderRadius: "10px", cursor: "pointer" }}
                                     >
                                         Cancel
                                     </button>
                                 </div>
+
                             </div>
                         ))}
                         {appointments.length === 0 && <p style={{ textAlign: "center", color: "#64748b" }}>No appointments found.</p>}
@@ -135,8 +157,73 @@ const DoctorDashboard = () => {
                 </AnimatePresence>
 
             </div>
+
+            <AnimatePresence>
+                {showSummary && patientSummary && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                        background: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(8px)',
+                        display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000
+                    }}>
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            style={{
+                                background: 'white', padding: '40px', borderRadius: '40px',
+                                width: '90%', maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto',
+                                position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+                            }}
+                        >
+                            <button onClick={() => setShowSummary(false)} style={{
+                                position: 'absolute', top: '25px', right: '25px', border: 'none',
+                                background: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b'
+                            }}>&times;</button>
+
+                            <h2 style={{ marginBottom: '8px', color: '#1e293b' }}>Patient Clinical Insight</h2>
+                            <p style={{ color: '#64748b', marginBottom: '32px' }}>Recent health patterns and logs</p>
+
+                            <div style={{ display: 'grid', gap: '20px' }}>
+                                <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '20px' }}>
+                                    <h4 style={{ margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span>🧠</span> Automated AI Predictions
+                                    </h4>
+                                    <div style={{ display: 'grid', gap: '10px' }}>
+                                        {patientSummary.insights.map((insight, idx) => (
+                                            <div key={idx} style={{
+                                                fontSize: '0.9rem', padding: '10px', borderRadius: '10px',
+                                                background: insight.startsWith('ALERT') ? '#fee2e2' : '#e0f2fe',
+                                                color: insight.startsWith('ALERT') ? '#991b1b' : '#0369a1'
+                                            }}>
+                                                {insight}
+                                            </div>
+                                        ))}
+                                        {patientSummary.insights.length === 0 && <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>No predictive patterns available.</p>}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 style={{ marginBottom: '12px' }}>Recent Logging History</h4>
+                                    <div style={{ display: 'grid', gap: '12px' }}>
+                                        {patientSummary.history.slice(0, 5).map((log, idx) => (
+                                            <div key={idx} style={{ padding: '15px', borderRadius: '15px', border: '1px solid #f1f5f9', fontSize: '0.85rem' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                                    <strong>{log.logDate}</strong>
+                                                    <span style={{ color: '#3b82f6' }}>Mood: {log.mood}</span>
+                                                </div>
+                                                <p style={{ margin: 0 }}>Symptoms: {log.symptoms || 'None recorded'}</p>
+                                                <p style={{ margin: '4px 0 0 0', color: '#64748b' }}>Water: {log.waterIntake}ml | Sleep: {log.sleepHours}h</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
+
 
 export default DoctorDashboard;

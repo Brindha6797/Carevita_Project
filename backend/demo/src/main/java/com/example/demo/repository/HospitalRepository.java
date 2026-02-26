@@ -10,4 +10,6 @@ public interface HospitalRepository extends JpaRepository<Hospital, Long> {
     List<Hospital> findByLocationContainingIgnoreCase(String location);
 
     List<Hospital> findByNameContainingIgnoreCase(String name);
+
+    java.util.Optional<Hospital> findByName(String name);
 }

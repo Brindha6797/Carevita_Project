@@ -8,14 +8,25 @@ public class JwtResponse {
     private Long id;
     private String username;
     private String email;
+    private Long hospitalId;
     private List<String> roles;
 
-    public JwtResponse(String accessToken, Long id, String username, String email, List<String> roles) {
+    public JwtResponse(String accessToken, Long id, String username, String email, Long hospitalId,
+            List<String> roles) {
         this.token = accessToken;
         this.id = id;
         this.username = username;
         this.email = email;
+        this.hospitalId = hospitalId;
         this.roles = roles;
+    }
+
+    public Long getHospitalId() {
+        return hospitalId;
+    }
+
+    public void setHospitalId(Long hospitalId) {
+        this.hospitalId = hospitalId;
     }
 
     public String getAccessToken() {

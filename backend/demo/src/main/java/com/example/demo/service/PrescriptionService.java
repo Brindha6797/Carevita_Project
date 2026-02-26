@@ -40,6 +40,14 @@ public class PrescriptionService {
         return repository.findByPatientIdAndStatus(patientId, "ACTIVE");
     }
 
+    public List<Prescription> getPendingDispatchByHospital(Long hospitalId) {
+        return repository.findByHospitalIdAndStatus(hospitalId, "PENDING_DISPATCH");
+    }
+
+    public List<Prescription> getByHospital(Long hospitalId) {
+        return repository.findByHospitalId(hospitalId);
+    }
+
     public Prescription updatePrescription(Long id, Prescription prescriptionDetails) {
         Prescription prescription = getPrescriptionById(id);
 

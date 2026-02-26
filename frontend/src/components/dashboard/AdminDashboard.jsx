@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import AdminService from "../../services/adminService";
+import API from "../../services/api";
 import { motion } from "framer-motion";
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [doctors, setDoctors] = useState([]);
+    const [hospitals, setHospitals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [activeTab, setActiveTab] = useState("users");
@@ -16,18 +18,22 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [usersRes, doctorsRes] = await Promise.all([
+            // We use API directly for hospitals as AdminService might not have it yet
+            const [usersRes, doctorsRes, hospitalsRes] = await Promise.all([
                 AdminService.getAllUsers(),
-                AdminService.getAllDoctors()
+                AdminService.getAllDoctors(),
+                API.get("/hospitals")
             ]);
             setUsers(usersRes.data);
             setDoctors(doctorsRes.data);
+            setHospitals(hospitalsRes.data);
             setLoading(false);
         } catch (err) {
             setError("Failed to fetch data. Are you logged in as Admin?");
             setLoading(false);
         }
     };
+
 
     const handleDeleteUser = async (id) => {
         if (window.confirm("Are you sure you want to delete this user?")) {
@@ -100,7 +106,24 @@ const AdminDashboard = () => {
                 >
                     Doctors ({doctors.length})
                 </button>
+                <button
+                    onClick={() => setActiveTab("hospitals")}
+                    className={activeTab === "hospitals" ? "tab-btn active" : "tab-btn"}
+                    style={{
+                        padding: "10px 30px",
+                        borderRadius: "30px",
+                        border: "none",
+                        cursor: "pointer",
+                        background: activeTab === "hospitals" ? "var(--primary)" : "white",
+                        color: activeTab === "hospitals" ? "white" : "var(--text-main)",
+                        fontWeight: "600",
+                        boxShadow: "0 4px 6px rgba(0,0,0,0.05)"
+                    }}
+                >
+                    Hospitals ({hospitals.length})
+                </button>
             </div>
+
 
             <motion.div
                 key={activeTab}
@@ -129,7 +152,11 @@ const AdminDashboard = () => {
                         </thead>
                         <tbody>
                             {users.map(user => (
-                                <tr key={user.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                                <motion.tr
+                                    key={user.id}
+                                    whileHover={{ background: "rgba(79, 70, 229, 0.03)" }}
+                                    style={{ borderBottom: "1px solid #f1f5f9", cursor: 'default' }}
+                                >
                                     <td style={{ padding: "15px" }}>{user.id}</td>
                                     <td style={{ padding: "15px", fontWeight: "600" }}>{user.fullName || user.username}</td>
                                     <td style={{ padding: "15px" }}>{user.email}</td>
@@ -142,11 +169,12 @@ const AdminDashboard = () => {
                                             Delete
                                         </button>
                                     </td>
-                                </tr>
+                                </motion.tr>
                             ))}
+
                         </tbody>
                     </table>
-                ) : (
+                ) : activeTab === "doctors" ? (
                     <table style={{ width: "100%", borderCollapse: "collapse" }}>
                         <thead>
                             <tr style={{ borderBottom: "2px solid #f1f5f9", textAlign: "left" }}>
@@ -159,7 +187,11 @@ const AdminDashboard = () => {
                         </thead>
                         <tbody>
                             {doctors.map(doctor => (
-                                <tr key={doctor.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                                <motion.tr
+                                    key={doctor.id}
+                                    whileHover={{ background: "rgba(79, 70, 229, 0.03)" }}
+                                    style={{ borderBottom: "1px solid #f1f5f9", cursor: 'default' }}
+                                >
                                     <td style={{ padding: "15px" }}>{doctor.id}</td>
                                     <td style={{ padding: "15px", fontWeight: "600" }}>{doctor.name}</td>
                                     <td style={{ padding: "15px" }}>{doctor.specialization}</td>
@@ -172,11 +204,47 @@ const AdminDashboard = () => {
                                             Delete
                                         </button>
                                     </td>
-                                </tr>
+                                </motion.tr>
                             ))}
+
+                        </tbody>
+                    </table>
+                ) : (
+                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                        <thead>
+                            <tr style={{ borderBottom: "2px solid #f1f5f9", textAlign: "left" }}>
+                                <th style={{ padding: "15px" }}>ID</th>
+                                <th style={{ padding: "15px" }}>Hospital Name</th>
+                                <th style={{ padding: "15px" }}>Location</th>
+                                <th style={{ padding: "15px" }}>Contact</th>
+                                <th style={{ padding: "15px" }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {hospitals.map(h => (
+                                <motion.tr
+                                    key={h.id}
+                                    whileHover={{ background: "rgba(79, 70, 229, 0.03)" }}
+                                    style={{ borderBottom: "1px solid #f1f5f9", cursor: 'default' }}
+                                >
+                                    <td style={{ padding: "15px" }}>{h.id}</td>
+                                    <td style={{ padding: "15px", fontWeight: "600" }}>{h.name}</td>
+                                    <td style={{ padding: "15px" }}>{h.location}</td>
+                                    <td style={{ padding: "15px" }}>{h.contactNumber}</td>
+                                    <td style={{ padding: "15px" }}>
+                                        <button
+                                            style={{ background: "#fee2e2", color: "#ef4444", border: "none", padding: "6px 12px", borderRadius: "8px", cursor: "pointer" }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </motion.tr>
+                            ))}
+
                         </tbody>
                     </table>
                 )}
+
             </motion.div>
         </div>
     );

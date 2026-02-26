@@ -15,12 +15,15 @@ public class Doctor {
     private String name;
     private String specialization;
     private String hospitalName;
+    private Long hospitalId;
     private String location;
     private Integer experience;
     private String bio;
     private Double consultationFee;
     private String availability;
     private String email;
+    @jakarta.persistence.Column(name = "approved", nullable = false)
+    private boolean approved = false;
 
     public Doctor() {
     }
@@ -103,5 +106,21 @@ public class Doctor {
 
     public void setAvailability(String availability) {
         this.availability = availability;
+    }
+
+    public Long getHospitalId() {
+        return hospitalId;
+    }
+
+    public void setHospitalId(Long hospitalId) {
+        this.hospitalId = hospitalId;
+    }
+
+    public boolean getApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
     }
 }

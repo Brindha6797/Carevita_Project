@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import prescriptionService from "../services/prescriptionService";
@@ -10,13 +10,7 @@ const PrescriptionDetails = () => {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const currentUser = JSON.parse(localStorage.getItem("user"));
-        setUser(currentUser);
-        fetchPrescription();
-    }, [id]);
-
-    const fetchPrescription = async () => {
+    const fetchPrescription = useCallback(async () => {
         try {
             const response = await prescriptionService.getPrescriptionById(id);
             setPrescription(response.data);
@@ -25,7 +19,13 @@ const PrescriptionDetails = () => {
             console.error("Error fetching prescription:", error);
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        const currentUser = JSON.parse(localStorage.getItem("user"));
+        setUser(currentUser);
+        fetchPrescription();
+    }, [id, fetchPrescription]);
 
     const handleUpdateStatus = async (newStatus) => {
         try {

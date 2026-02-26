@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import API from "../../services/api";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import NotificationFeed from "../NotificationFeed";
+
 
 const UserDashboard = () => {
     const [summary, setSummary] = useState(null);
@@ -40,7 +42,36 @@ const UserDashboard = () => {
     );
 
     return (
-        <div className="user-dashboard" style={{ padding: "40px 5%", background: "var(--background)", minHeight: "100vh" }}>
+        <div className="user-dashboard" style={{ padding: "40px 5%", background: "var(--background)", minHeight: "100vh", position: 'relative' }}>
+            {error && (
+                <div style={{
+                    padding: '20px', background: '#fee2e2', color: '#dc2626',
+                    borderRadius: '20px', marginBottom: '30px', textAlign: 'center', border: '1px solid #fecaca'
+                }}>
+                    {error}
+                </div>
+            )}
+
+
+            {/* Floating SOS Button */}
+            <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                style={{
+                    position: 'fixed', bottom: '40px', right: '40px', zIndex: 1000
+                }}
+            >
+                <Link to="/emergency" style={{ textDecoration: 'none' }}>
+                    <div style={{
+                        width: '80px', height: '80px', borderRadius: '50%', background: '#ef4444',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem',
+                        boxShadow: '0 10px 25px rgba(239, 68, 68, 0.4)', color: 'white'
+                    }}>
+                        🆘
+                    </div>
+                </Link>
+            </motion.div>
+
 
             {/* Header with Care Reminder Buddy */}
             <motion.div
@@ -72,34 +103,43 @@ const UserDashboard = () => {
                 )}
             </motion.div>
 
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 350px", gap: "30px", marginBottom: '30px' }}>
+                <div style={{ display: 'grid', gap: '30px' }}>
+                    {/* Health Pattern Predictor Section */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="card pattern-predictor"
+                        style={{ background: "white", padding: "30px", borderRadius: "30px", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}
+                    >
+                        <h2 style={{ fontSize: "1.5rem", marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
+                            <span>🧠</span> Health Pattern Predictor
+                        </h2>
+                        <div style={{ display: "grid", gap: "15px" }}>
+                            {summary?.insights?.map((insight, idx) => (
+                                <div key={idx} style={{
+                                    padding: "15px",
+                                    borderRadius: "15px",
+                                    background: insight.startsWith("ALERT") ? "#fef2f2" : insight.startsWith("PATTERN") ? "#fff7ed" : "#f8fafc",
+                                    borderLeft: `5px solid ${insight.startsWith("ALERT") ? "#ef4444" : insight.startsWith("PATTERN") ? "#f97316" : "#4f46e5"}`
+                                }}>
+                                    <p style={{ margin: 0, fontSize: "0.95rem", color: "#1e293b" }}>{insight}</p>
+                                </div>
+                            ))}
+                            {(!summary?.insights || summary.insights.length === 0) && (
+                                <p style={{ color: "var(--text-muted)" }}>Not enough data for patterns. Keep logging symptoms!</p>
+                            )}
+                        </div>
+                    </motion.div>
+                </div>
+
+                <div style={{ display: 'grid', gap: '30px' }}>
+                    <NotificationFeed />
+                </div>
+            </div>
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "30px" }}>
 
-                {/* Health Pattern Predictor Section */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="card pattern-predictor"
-                    style={{ background: "white", padding: "30px", borderRadius: "30px", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}
-                >
-                    <h2 style={{ fontSize: "1.5rem", marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span>🧠</span> Health Pattern Predictor
-                    </h2>
-                    <div style={{ display: "grid", gap: "15px" }}>
-                        {summary?.insights?.map((insight, idx) => (
-                            <div key={idx} style={{
-                                padding: "15px",
-                                borderRadius: "15px",
-                                background: insight.startsWith("ALERT") ? "#fef2f2" : insight.startsWith("PATTERN") ? "#fff7ed" : "#f8fafc",
-                                borderLeft: `5px solid ${insight.startsWith("ALERT") ? "#ef4444" : insight.startsWith("PATTERN") ? "#f97316" : "#4f46e5"}`
-                            }}>
-                                <p style={{ margin: 0, fontSize: "0.95rem", color: "#1e293b" }}>{insight}</p>
-                            </div>
-                        ))}
-                        {(!summary?.insights || summary.insights.length === 0) && (
-                            <p style={{ color: "var(--text-muted)" }}>Not enough data for patterns. Keep logging symptoms!</p>
-                        )}
-                    </div>
-                </motion.div>
 
                 {/* Mood + Health Sync */}
                 <motion.div

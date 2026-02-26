@@ -35,9 +35,11 @@ public class Prescription {
     private LocalDateTime prescriptionDate;
     private LocalDateTime validUntil;
 
-    private String status; // ACTIVE, COMPLETED, EXPIRED, CANCELLED
+    private String status; // ACTIVE, PENDING_DISPATCH, COMPLETED, EXPIRED, CANCELLED
+    private Long hospitalId;
 
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -168,6 +170,14 @@ public class Prescription {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Long getHospitalId() {
+        return hospitalId;
+    }
+
+    public void setHospitalId(Long hospitalId) {
+        this.hospitalId = hospitalId;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -86,7 +86,7 @@ const DoctorSignup = () => {
 
                     <div className="input-row" style={{ display: "flex", gap: "15px" }}>
                         <div className="input-group" style={{ flex: 1 }}>
-                            <label>Username (ID)</label>
+                            <label>Username</label>
                             <input
                                 type="text"
                                 name="username"

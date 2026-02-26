@@ -34,7 +34,9 @@ public class User {
     private String phoneNumber;
     private String address;
     private String hospital;
+    private Long hospitalId;
     private String qualification;
+
     private String experience;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
@@ -137,5 +139,13 @@ public class User {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public Long getHospitalId() {
+        return hospitalId;
+    }
+
+    public void setHospitalId(Long hospitalId) {
+        this.hospitalId = hospitalId;
     }
 }

@@ -45,4 +45,17 @@ public class HealthController {
 
         return ResponseEntity.ok(summary);
     }
+
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<?> getPatientHealthSummary(@PathVariable("patientId") Long patientId) {
+        User user = userRepository.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("today", dailyLogService.getTodayLog(user).orElse(null));
+        summary.put("history", dailyLogService.getUserLogs(user));
+        summary.put("insights", insightsService.generateInsights(user));
+
+        return ResponseEntity.ok(summary);
+    }
 }

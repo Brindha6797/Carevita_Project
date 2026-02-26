@@ -46,10 +46,29 @@ public class AppointmentService {
         return repository.findByPatient(patient);
     }
 
+    public List<Appointment> getAppointmentsByHospital(Long hospitalId) {
+
+        return repository.findByHospitalId(hospitalId);
+    }
+
+    public List<Appointment> getPendingAppointmentsByHospital(Long hospitalId) {
+        return repository.findByHospitalIdAndStatus(hospitalId, "PENDING");
+    }
+
     public Appointment updateStatus(Long id, String status) {
         Appointment appointment = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
         appointment.setStatus(status);
+        return repository.save(appointment);
+    }
+
+    public Appointment confirmAppointment(Long id, com.example.demo.model.Doctor doctor, String date, String time) {
+        Appointment appointment = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+        appointment.setDoctor(doctor);
+        appointment.setAppointmentDate(date);
+        appointment.setAppointmentTime(time);
+        appointment.setStatus("CONFIRMED");
         return repository.save(appointment);
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import API from "../services/api";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const BookingModal = ({ doctor, onClose }) => {
     const [step, setStep] = useState(1);
@@ -13,11 +13,13 @@ const BookingModal = ({ doctor, onClose }) => {
         setLoading(true);
         try {
             await API.post("/appointments/book", {
+                hospitalId: doctor.hospitalId,
                 doctor: { id: doctor.id },
                 appointmentDate: date,
                 appointmentTime: time,
-                reason: reason
+                problem: reason
             });
+
             alert("Appointment booked successfully!");
             onClose();
         } catch (err) {

@@ -4,6 +4,8 @@ import com.example.demo.model.EmergencyContact;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.EmergencyContactService;
+import com.example.demo.service.HospitalService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,9 @@ public class EmergencyController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private HospitalService hospitalService;
 
     @PostMapping("/add")
     public ResponseEntity<?> addContact(@RequestBody EmergencyContact contact, Principal principal) {
@@ -37,8 +42,13 @@ public class EmergencyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteContact(@PathVariable Long id) {
+    public ResponseEntity<?> deleteContact(@PathVariable("id") Long id) {
         service.deleteContact(id);
         return ResponseEntity.ok("Contact deleted");
+    }
+
+    @GetMapping("/nearest")
+    public ResponseEntity<?> getNearestHospitals(@RequestParam("location") String location) {
+        return ResponseEntity.ok(hospitalService.getHospitalsByLocation(location));
     }
 }

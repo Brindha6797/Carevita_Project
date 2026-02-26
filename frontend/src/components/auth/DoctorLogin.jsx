@@ -37,7 +37,7 @@ const DoctorLogin = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">
-                        <label>Doctor Username (ID)</label>
+                        <label>Username</label>
                         <input
                             type="text"
                             value={username}
